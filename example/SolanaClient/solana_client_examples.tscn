@@ -31,6 +31,13 @@ columns = 2
 layout_mode = 2
 size_flags_vertical = 3
 columns = 2
+hide_root = true
+
+[node name="ResultTree5" type="Tree" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+hide_root = true
 
 [node name="Timeout" type="Timer" parent="."]
 wait_time = 20.0

@@ -2,7 +2,7 @@ extends VBoxContainer
 
 const EXAMPLE_ACCOUNT := "4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZAMdL4VZHirAn"
 
-const TOTAL_CASES := 7
+const TOTAL_CASES := 8
 var passed_test_mask := 0
 		
 
@@ -10,20 +10,27 @@ func PASS(unique_identifier: int):
 	passed_test_mask += (1 << unique_identifier)
 	print("[OK]: ", unique_identifier)
 
+
 func display_dict(data: Variant, parent: TreeItem):
-	if(typeof(data) == TYPE_STRING):
+	if typeof(data) == TYPE_STRING:
 		parent.set_text(1, data)
-	elif(typeof(data) != TYPE_DICTIONARY):
+	elif typeof(data) == TYPE_ARRAY:
+		for i in range(data.size()):
+			var subchild = parent.create_child()
+			subchild.set_editable(1, true)
+			subchild.set_text(0, str(i))
+			display_dict(data[i], subchild)
+	elif typeof(data) != TYPE_DICTIONARY:
 		parent.set_text(1, str(data))
 	else:
 		var data_dict: Dictionary = data
 		var keys = data_dict.keys()
-		var values = data_dict.values()
-		for i in range(keys.size()):
+		for key in keys:
 			var subchild = parent.create_child()
 			subchild.set_editable(1, true)
-			subchild.set_text(0, keys[i])
-			display_dict(values[i], subchild)
+			subchild.set_text(0, key)
+			display_dict(data_dict[key], subchild)
+
 
 func add_solana_client() -> SolanaClient:
 	var res = SolanaClient.new()
@@ -88,6 +95,7 @@ func subscribe_account_demo():
 	
 	PASS(3)
 
+
 func synchronous_client_call():
 	# Same call to get account info but synchronous.
 	var client = SolanaClient.new()
@@ -97,11 +105,38 @@ func synchronous_client_call():
 	PASS(6)
 
 
+func get_program_accounts_demo():
+	const account = "CLUBHBUKuKxWmRpJkAZEWqadeu9A8FB5TdzzKRJiEdXq";
+	var client: SolanaClient = add_solana_client()
+	const filters = [
+		{ 
+			"memcmp" : {
+		"offset": 0,
+		"bytes": "FZFe",
+		"encoding": "base64"
+	}
+		},
+		{
+			"dataSize": 592
+		}
+	]
+	client.get_program_accounts(account, false, filters)
+	
+	var response : Dictionary = await client.http_response_received
+	assert(response.has("result"))
+	var accounts = response["result"]
+	
+	display_dict(accounts, $ResultTree5.create_item())
+	delete_solana_client(client)
+	PASS(7)
+
+
 func _ready():
 	get_account_info_demo()
 	get_latest_blockhash_demo()
 	get_minimum_balance_for_rent_extemption_demo()
 	subscribe_account_demo()
+	get_program_accounts_demo()
 	synchronous_client_call()
 
 

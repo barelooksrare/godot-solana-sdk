@@ -109,7 +109,7 @@ private:
     void append_min_context_slot(Array& options);
     void append_encoding(Array& options);
     void append_account_filter(Array& options);
-    void append_data_filter(Array& options);
+    void append_data_filter(Array& options, const Array& filters);
     void append_transaction_detail(Array& options);
     void append_max_transaction_version(Array& options);
     void append_rewards(Array& options);
@@ -206,7 +206,7 @@ public:
     Dictionary get_max_shred_insert_slot();
     Dictionary get_minimum_balance_for_rent_extemption(uint64_t data_size);
     Dictionary get_multiple_accounts(const PackedStringArray accounts);
-    Dictionary get_program_accounts(const String& program_address, bool with_context = false);
+    Dictionary get_program_accounts(const String& program_address, bool with_context = false, const Array& filters = Array());
     Dictionary get_recent_performance_samples();
     Dictionary get_recent_prioritization_fees(PackedStringArray account_addresses);
     Dictionary get_signature_for_address(const String& address, const String& before = "", const String& until = "");

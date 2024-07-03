@@ -101,7 +101,10 @@ void SolanaClient::append_account_filter(Array& options){
     }
 }
 
-void SolanaClient::append_data_filter(Array& options){
+void SolanaClient::append_data_filter(Array& options, const Array& filters){
+    if(!filters.is_empty()){
+        add_to_param_dict(options, "filters", filters);
+    }
     
 }
 
@@ -759,7 +762,7 @@ Dictionary SolanaClient::get_multiple_accounts(const PackedStringArray accounts)
     return quick_http_request(make_rpc_dict("getMultipleAccounts", params));
 }
 
-Dictionary SolanaClient::get_program_accounts(const String& program_address, bool with_context){
+Dictionary SolanaClient::get_program_accounts(const String& program_address, bool with_context, const Array& filters){
     Array params;
     params.append(program_address);
     append_commitment(params);
@@ -767,7 +770,7 @@ Dictionary SolanaClient::get_program_accounts(const String& program_address, boo
     add_to_param_dict(params, "withContext", with_context);
     append_encoding(params);
     append_account_filter(params);
-    append_data_filter(params);
+    append_data_filter(params, filters);
 
     return quick_http_request(make_rpc_dict("getProgramAccounts", params));
 }
@@ -1150,7 +1153,7 @@ void SolanaClient::_bind_methods(){
     ClassDB::bind_method(D_METHOD("get_max_shred_insert_slot"), &SolanaClient::get_max_shred_insert_slot);
     ClassDB::bind_method(D_METHOD("get_minimum_balance_for_rent_extemption", "data_size"), &SolanaClient::get_minimum_balance_for_rent_extemption);
     ClassDB::bind_method(D_METHOD("get_multiple_accounts", "accounts"), &SolanaClient::get_multiple_accounts);
-    ClassDB::bind_method(D_METHOD("get_program_accounts", "program_address", "with_context"), &SolanaClient::get_program_accounts);
+    ClassDB::bind_method(D_METHOD("get_program_accounts", "program_address", "with_context", "filters"), &SolanaClient::get_program_accounts);
     ClassDB::bind_method(D_METHOD("get_recent_performance_samples"), &SolanaClient::get_recent_performance_samples);
     ClassDB::bind_method(D_METHOD("get_recent_prioritization_fees", "account_addresses"), &SolanaClient::get_recent_prioritization_fees);
     ClassDB::bind_method(D_METHOD("get_signature_for_address", "address", "before", "until"), &SolanaClient::get_signature_for_address);
@@ -1252,10 +1255,14 @@ Dictionary SolanaClient::parse_url(const String& url){
         sliced_url = sliced_url.substr(0, path_location);
     }
     
+    // Get port or default to https.
     strings = sliced_url.split(":");
     if(strings.size() > 1){
         result["port"] = strings[1].to_int();
         sliced_url = strings[0];
+    }
+    else{
+        result["port"] = DEFAULT_PORT;
     }
 
     strings = sliced_url.split("@");
