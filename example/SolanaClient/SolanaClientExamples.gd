@@ -111,10 +111,10 @@ func get_program_accounts_demo():
 	const filters = [
 		{ 
 			"memcmp" : {
-		"offset": 0,
-		"bytes": "FZFe",
-		"encoding": "base64"
-	}
+				"offset": 0,
+				"bytes": "FZFe",
+				"encoding": "base64"
+			}
 		},
 		{
 			"dataSize": 592
